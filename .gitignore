@@ -1,4 +1,4 @@
-# Unreal Engine
+# Unreal Engine generated files
 Binaries/
 DerivedDataCache/
 Intermediate/
@@ -8,30 +8,26 @@ Saved/
 *.VC.db
 *.VC.opendb
 
-# Build artifacts
-*.sln
-*.suo
-*.xcodeproj
-*.xcworkspace
-*.opensdf
-*.sdf
+# Build config
 *.suo
 *.user
-*.userprefs
-*.ipch
+*.userosscache
+*.sln.docstates
 
-# Config cache
+# Backup files
 *.log
-*.tlog
+*.tmp
+*.bak
+*.swp
 
-# Backup & autosave
-*.autosave
-*.backup
+# Compiled
+*.pdb
+*.obj
+*.exe
+*.dll
+*.lib
 
-# Ignore generated folders in plugins
-Plugins/*/Intermediate/
-Plugins/*/Binaries/
-
-# Ignore local config (can store personal editor prefs)
-Config/DefaultEditorPerProjectUserSettings.ini
-Config/DefaultEditorUserSettings.ini
+# Ignore IDE junk
+*.opensdf
+*.sdf
+*.sln.iml
