@@ -46,6 +46,6 @@ void ARoadWay::SpawnCar()
 	UE_LOG(LogTemp, Warning, TEXT("Spawning car at %s (Actor %s, Offset %s)"), *WorldSpawnLoc.ToString(), *GetName(), *SpawnOffset.ToString());
 
 	FActorSpawnParameters SpawnParams;
-	AActor* Car = GetWorld()->SpawnActor<AActor>(CarClass, SpawnOffset, FRotator::ZeroRotator, SpawnParams);
+	AActor* Car = GetWorld()->SpawnActor<AActor>(CarClass, WorldSpawnLoc, FRotator::ZeroRotator, SpawnParams);
 }
 

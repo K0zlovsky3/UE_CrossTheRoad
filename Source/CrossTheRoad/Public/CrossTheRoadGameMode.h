@@ -17,5 +17,11 @@ class CROSSTHEROAD_API ACrossTheRoadGameMode : public AGameModeBase
 public:
 
 	ACrossTheRoadGameMode();
+
+	//bool bIsGamePaused = false;
+
+	// Function to handle game over logic
+	UFUNCTION(BlueprintCallable)
+	void GameOver();
 	
 };

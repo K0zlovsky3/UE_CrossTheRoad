@@ -2,15 +2,17 @@
 
 
 #include "PlayerBall.h"
+#include "Car.h"
 #include "Components/SphereComponent.h"
 #include "Components/StaticMeshComponent.h"
 #include "Components/InputComponent.h"
 #include "Camera/CameraComponent.h"
-//#include "GameFramework/FloatingPawnMovement.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "GameFramework/PlayerController.h"
 #include "GameFramework/PlayerInput.h"
 #include "TimerManager.h"
+#include "CrossTheRoadGameMode.h"
+#include "Kismet/GameplayStatics.h"
 
 
 // Sets default values
@@ -41,9 +43,6 @@ APlayerBall::APlayerBall()
 	Camera = CreateDefaultSubobject<UCameraComponent>(TEXT("PlayerCamera"));
 	Camera->SetupAttachment(SpringArm, USpringArmComponent::SocketName);
 
-	//// Pawn movement component (Text - Default Name)
-	//MovementComponent = CreateDefaultSubobject<UFloatingPawnMovement>(TEXT("MovementComponent"));
-
 	// Give the ability to player to control
 	AutoPossessPlayer = EAutoReceiveInput::Player0;
 }
@@ -52,6 +51,9 @@ APlayerBall::APlayerBall()
 void APlayerBall::BeginPlay()
 {
 	Super::BeginPlay();
+
+	// Start to check for overlaps
+	Collision->OnComponentBeginOverlap.AddDynamic(this, &APlayerBall::OnOverlapBegin);
 	
 }
 
@@ -59,14 +61,12 @@ void APlayerBall::BeginPlay()
 void APlayerBall::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-
 }
 
 // Called to bind functionality to input
 void APlayerBall::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
-	//check(PlayerInputComponent);
 
 	UE_LOG(LogTemp, Warning, TEXT("SetupPlayerInputComponent CALLED!"));
 
@@ -84,7 +84,8 @@ void APlayerBall::ResetStep() {
 
 void APlayerBall::MoveForward() {
 	
-	if (!bCanStep) return;
+	// check if can step or is alive
+	if (!bCanStep || !bIsAlive) return;
 	bCanStep = false;
 
 	// Move the ball forward by StepSize units
@@ -97,19 +98,12 @@ void APlayerBall::MoveForward() {
 	GetWorldTimerManager().SetTimer(StepTimer, this, &APlayerBall::ResetStep, StepCooldown, false);
 	
 	UE_LOG(LogTemp, Warning, TEXT("Move Forward: %f"), StepSize);
-	
-	//if (value != 0.f) {
-	//	FVector Step = FVector(value * StepSize, 0.f, 0.f);
-	//	AddActorWorldOffset(Step, true);
-	//	//AddMovementInput(FVector::ForwardVector, value);
-	//	UE_LOG(LogTemp, Warning, TEXT("Move Forward"), value);
-	//}
 }
-
 
 void APlayerBall::MoveRight() {
 	
-	if (!bCanStep) return;
+	// check if can step or is alive
+	if (!bCanStep || !bIsAlive) return;
 	bCanStep = false;
 
 	// Move the ball forward by StepSize units
@@ -126,7 +120,8 @@ void APlayerBall::MoveRight() {
 
 void APlayerBall::MoveLeft() {
 
-	if (!bCanStep) return;
+	// check if can step or is alive
+	if (!bCanStep || !bIsAlive) return;
 	bCanStep = false;
 
 	// Move the ball forward by StepSize units
@@ -139,4 +134,35 @@ void APlayerBall::MoveLeft() {
 	GetWorldTimerManager().SetTimer(StepTimer, this, &APlayerBall::ResetStep, StepCooldown, false);
 
 	UE_LOG(LogTemp, Warning, TEXT("Move Left: %f"), StepSize);
+}
+
+void APlayerBall::OnOverlapBegin(
+	class UPrimitiveComponent* OverlappedComp,
+	class AActor* OtherActor,
+	class UPrimitiveComponent* OtherComp,
+	int32 OtherBodyIndex,
+	bool bFromSweep,
+	const FHitResult& SweepResult
+) {
+	// Check if the overlapping actor is valid and not itself
+	if (OtherActor && OtherActor != this) {
+		if (OtherActor->IsA(ACar::StaticClass())) {
+			UE_LOG(LogTemp, Warning, TEXT("Overlap Begin with %s"), *OtherActor->GetName());
+			DeathEvent();
+		}
+	}
+}
+
+void APlayerBall::DeathEvent() {
+	// Handle game over logic here (e.g., disable input, play animation, etc.)
+	if (!bIsAlive) return;
+	bIsAlive = false;
+
+	UE_LOG(LogTemp, Warning, TEXT("Player has died. Game Over."));
+
+	// Notify the game mode about the game over
+	ACrossTheRoadGameMode* GameMode = Cast<ACrossTheRoadGameMode>(UGameplayStatics::GetGameMode(this));
+	if (GameMode) {
+		GameMode->GameOver();
+	}
 }

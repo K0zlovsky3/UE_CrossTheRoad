@@ -4,7 +4,6 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Pawn.h"
-//#include "GameFramework/FloatingPawnMovement.h"
 #include "PlayerBall.generated.h"
 
 UCLASS()
@@ -25,6 +24,22 @@ protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
+	// Reset the ability to step
+	void ResetStep();
+
+	void DeathEvent();
+
+	// Overlap event
+	UFUNCTION()
+	void OnOverlapBegin(
+		class UPrimitiveComponent* OverlappedComp,
+		class AActor* OtherActor,
+		class UPrimitiveComponent* OtherComp,
+		int32 OtherBodyIndex,
+		bool bFromSweep,
+		const FHitResult& SweepResult
+	);
+	
 	// Ball movement
 	void MoveForward();
 	void MoveRight();
@@ -46,10 +61,6 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Components")
 	class UCameraComponent* Camera;
 
-	//// Pawn movement component
-	//UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Components");
-	//class UFloatingPawnMovement* MovementComponent;
-
 	// Step size for each movement input
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Movement")
 	float StepSize = 200.f;
@@ -61,8 +72,9 @@ protected:
 	// bool to check if the player can step
 	bool bCanStep = true;
 
-	// Reset the ability to step
-	void ResetStep();
+	// bool to check if the player is alive
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State")
+	bool bIsAlive = true;
 
 	FTimerHandle StepTimer;
 };
